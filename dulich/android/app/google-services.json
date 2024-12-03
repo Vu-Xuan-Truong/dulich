@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "191575077165",
+    "project_id": "dulich-6592c",
+    "storage_bucket": "dulich-6592c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191575077165:android:c0489fb667ce19258763a4",
+        "android_client_info": {
+          "package_name": "com.dulich"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFs6V2LXJIeXtWySHAae9Cp4iFA_VZpeg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
