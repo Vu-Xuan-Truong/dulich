@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Pressable, ScrollView, TouchableOpacity, Alert, RefreshControl, Share } from 'react-native';
+import { View, Text, StyleSheet, Modal, FlatList, Image, Pressable, ScrollView, TouchableOpacity, Alert, RefreshControl, Share } from 'react-native';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Video from 'react-native-video';
 import { styles } from '../layput/LayoutHome/layoutHome';
+import TruncatedText from '../services/multipurpose/TruncatedText';
 
-const HomeScreen = ({ navigation, userId }) => {
+const HomeScreen = ({ navigation, userId, postId }) => {
   const [posts, setPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -107,6 +108,10 @@ const HomeScreen = ({ navigation, userId }) => {
   const goToComments = (postId) => {
     navigation.navigate('Comments', { postId });
   };
+  const openMediaViewer = (mediaUrl, mediaType) => {
+    navigation.navigate('MediaViewer', { mediaUrl, mediaType });
+  };
+
 
   const handleLike = async (postId) => {
     const postRef = firestore().collection('posts').doc(postId);
@@ -187,8 +192,6 @@ const HomeScreen = ({ navigation, userId }) => {
     }
   };
 
-
-
   // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true); // Start refreshing
@@ -196,7 +199,9 @@ const HomeScreen = ({ navigation, userId }) => {
     setRefreshing(false); // End refreshing
   };
 
-
+  const handleReportPost = (postId) => {
+    navigation.navigate('Report', { postId });
+  };
 
   return (
     <View style={styles.container}>
@@ -250,38 +255,59 @@ const HomeScreen = ({ navigation, userId }) => {
                   </Pressable>
 
                   <View style={styles.rowContainer}>
-  <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text>
-  <Text style={styles.postCategory}>{item.category}</Text>
-</View>
+                    <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text>
+                    <Text style={styles.postCategory}>{item.category}</Text>
+                  </View>
 
                 </View>
               </View>
 
-              {item.userId === user && (
+              {/* {item.userId === user && (
                 <TouchableOpacity onPress={() => deletePost(item.id)}>
                   <Icon name="trash" size={20} color="#f00" />
                 </TouchableOpacity>
-              )}
+              )}  */}
+              <Menu>
+                <MenuTrigger>
+                  <Icon name="ellipsis-v" size={20} color="#333" />
+                </MenuTrigger>
+                <MenuOptions>
+                  <MenuOption onSelect={() => handleReportPost(item.id)}>
+                    <Text style={styles.menuOptionText}>⚠️ Tố cáo</Text>
+                  </MenuOption>
+                  {item.userId === user && (
+                    <MenuOption onSelect={() => deletePost(item.id)}>
+                      <Text style={[styles.menuOptionText, { color: 'red' }]}>❌ Xóa</Text>
+                    </MenuOption>
+                  )}
+                </MenuOptions>
+              </Menu>
+
+
             </View>
 
-            <Text style={styles.postDescription}>{item.description}</Text>
+            {/* <Text style={styles.postDescription}>{item.description}</Text> */}
+            <TruncatedText text={item.description} style={styles.postDescription} />
             <Text style={styles.postDescription}>Vị trí: {item.location}</Text>
             {/* <Text style={styles.postDescription}>Danh mục: {item.category}</Text> */}
 
             {/* Media Display Section */}
             {item.mediaUrls && item.mediaTypes && (
+
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.mediaContainer}>
                 {item.mediaUrls.map((mediaUrl, index) => (
                   <View key={index} style={styles.mediaWrapper}>
                     {item.mediaTypes[index] === 'video' ? (
-                      <Video
-                        source={{ uri: mediaUrl }}
-                        style={styles.video}
-                        controls={true}
-                        resizeMode="cover"
-                      />
+                      <TouchableOpacity onPress={() => openMediaViewer(mediaUrl, 'video')}>
+                        <Video
+                          source={{ uri: mediaUrl }}
+                          style={styles.video}
+                          controls={false} // Disable controls in list view
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
                     ) : (
-                      <TouchableOpacity onPress={() => goToComments(item.id)}>
+                      <TouchableOpacity onPress={() => openMediaViewer(mediaUrl, 'image')}>
                         <Image source={{ uri: mediaUrl }} style={styles.postMedia} />
                       </TouchableOpacity>
                     )}

@@ -7,7 +7,9 @@ import LoginScreen from '../src/Login/LoginScreen';
 import ForgotPasswordScreen from '../src/Login/ForgotPasswordScreen';
 import PasswordResetScreen from '../src/Login/PasswordResetScreen ';
 import ContactScreen from '../src/Home/ContactScreen ';
-import MediaViewerScreen from '../src/Home/MediaViewerScreen';
+import ReportScreen from '../src/Home/ReportScreen ';
+import MediaViewerScreen from '../src/services/multipurpose/MediaViewerScreen';
+
 
 import SettingScreen from '../src/Home/SettingScreen';
 import SearchScreen from '../src/Home/SearchScreen';
@@ -18,6 +20,7 @@ import FollowingPostsScreen from '../src/Home/FollowingPostsScreen';
 import AddNewScreen from '../src/Post/AddNewScreen';
 import TabNavigator from './TabNavigartor';
 import CommentsScreen from '../src/Post/CommetsScreen';
+
 import EditUserScreen from '../src/User/EditUserScreen';
 import UserProfileScreen from '../src/User/UserProfileScreen';
 import FollowingScreen from '../src/User/FollowingScreen';
@@ -46,6 +49,7 @@ export default RootNavigator = () => {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="PasswordReset" component={PasswordResetScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Contact" component={ContactScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Report" component={ReportScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="MediaViewer" component={MediaViewerScreen} options={{ headerShown: false }}/>
 
         <Stack.Screen name="Setting" component={SettingScreen} options={{ headerShown: false }}/>
@@ -55,6 +59,7 @@ export default RootNavigator = () => {
 
         <Stack.Screen name="AddNew" component={AddNewScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Comments" component={CommentsScreen} options={{ headerShown: false }}/>
+
         <Stack.Screen name="EditUser" component={EditUserScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Following" component={FollowingScreen} options={{ headerShown: false }}/>

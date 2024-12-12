@@ -4,7 +4,7 @@ import { collection, addDoc, doc, deleteDoc, query, onSnapshot, getDoc, where } 
 import { auth, firestore } from '../../firebase/firebase';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { styles } from '../../scr/Admin/Layout/commentlayout';
-
+import TruncatedText from '../services/TruncatedText';
 const CommentsScreen = ({ route, navigation }) => {
   const { postId } = route.params;
   const [post, setPost] = useState(null);
@@ -106,7 +106,8 @@ const CommentsScreen = ({ route, navigation }) => {
               <Icon name="arrow-left" size={20} color="#000" />
               <Text style={styles.backButtonText}>Trở về</Text>
             </TouchableOpacity>
-            <Text style={styles.postDescription}>{post.description}</Text>
+            {/* <Text style={styles.postDescription}>{post.description}</Text> */}
+            <TruncatedText text={post.description} style={styles.postDescription} />
             <Text style={styles.postDescription}>Vị trí: {post.location}</Text>
             <Text style={styles.postDescription}>Danh mục: {post.category}</Text>
           </View>

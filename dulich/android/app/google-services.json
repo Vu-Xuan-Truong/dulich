@@ -12,7 +12,20 @@
           "package_name": "com.dulich"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "191575077165-v02a27u5qskgrrafa2j3alvq1r3qgvg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dulich",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "191575077165-bp7kb7ng2ltir078fhe08042qbomahdi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCFs6V2LXJIeXtWySHAae9Cp4iFA_VZpeg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191575077165-bp7kb7ng2ltir078fhe08042qbomahdi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

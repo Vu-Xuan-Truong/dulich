@@ -159,4 +159,29 @@ export const styles = StyleSheet.create({
     padding: 10,
     flexGrow: 1, // Đảm bảo nội dung có thể cuộn
   },
+  likeContainer: {
+    marginVertical: 10,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  newlike: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  likeInfo: {
+    marginLeft: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  likeContent: {
+    color: '#555',
+    fontSize: 14,
+  },
+
+ 
+  
 });

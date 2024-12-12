@@ -47,8 +47,8 @@ const ChatbotScreen = () => {
       try {
         setLoading(true);
         const response = await axios.post(
-          //'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDW1IY5mDrhvGrQX8Gr-85jTOKB_tJLFJM',
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=OPENAI_API_KEY',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDW1IY5mDrhvGrQX8Gr-85jTOKB_tJLFJM',
+          
           {
             contents: [
               {

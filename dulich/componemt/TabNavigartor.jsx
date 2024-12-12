@@ -84,7 +84,7 @@ const TabNavigator = () => {
         name="Notification"
         component={NotificationScreen}
         options={{
-          tabBarLabel: "Thông báo",
+          tabBarLabel: "Hoạt động",
           tabBarIcon: ({ color, size }) => <Icon name='bell' color={color} size={size} />,
           tabBarBadge: hasNewNotifications ? '•' : undefined,
         }}

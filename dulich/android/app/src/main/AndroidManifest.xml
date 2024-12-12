@@ -13,6 +13,9 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
+      <meta-data
+            android:name="com.google.android.gms.client_id"
+            android:value="191575077165-irsv7kl4t9ghpn4d0q4rf0ft4jcmhcam.apps.googleusercontent.com" />
 
       <activity
         android:name=".MainActivity"

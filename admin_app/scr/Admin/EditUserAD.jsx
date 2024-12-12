@@ -115,7 +115,7 @@ const EditUserAD = ({ route, navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder="Tên"
         value={name}
         onChangeText={setName}
       />
@@ -127,28 +127,28 @@ const EditUserAD = ({ route, navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Age"
+        placeholder="Tuổi"
         value={age}
         onChangeText={setAge}
         keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
-        placeholder="Phone"
+        placeholder="Số điện thoại"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
       />
       <TextInput
         style={styles.input}
-        placeholder="Location"
+        placeholder="Địa chỉ"
         value={location}
         onChangeText={setLocation}
       />
       <View style={styles.passwordContainer}>
         <TextInput
           style={[styles.input, { flex: 1 }]} // Make input take up available space
-          placeholder="New Password"
+          placeholder="mật khẩu"
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword} // Toggle password visibility
@@ -158,7 +158,7 @@ const EditUserAD = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <Button title="Update User" onPress={handleUpdateUser} disabled={loading} />
+      <Button title="Cập nhật thông tin" onPress={handleUpdateUser} disabled={loading} />
       {loading && <ActivityIndicator size="small" color="#0000ff" style={styles.loading} />}
     </View>
   );

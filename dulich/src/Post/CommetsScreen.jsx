@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { fetchPostComments, addComment, editComment, deleteComment, deletePost } from '../services/Post/commentsBackend';
+import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Video from 'react-native-video';
+import TruncatedText from '../services/multipurpose/TruncatedText';
 import { styles } from '../layput/layoutPots/layoutComment';
 
 const CommentsScreen = ({ route, navigation }) => {
   const { postId } = route.params;
   const [post, setPost] = useState(null);
+  const [isPostVisible, setIsPostVisible] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedComment, setEditedComment] = useState('');
   const [savedPosts, setSavedPosts] = useState([]);
+  const [showPost, setShowPost] = useState(true); // Trạng thái để hiển thị bài viết
   const user = auth().currentUser;
 
   useEffect(() => {
@@ -146,26 +150,6 @@ const CommentsScreen = ({ route, navigation }) => {
     }
     return '';
   };
-  const handleLike = async () => {
-    if (post) {
-      const liked = post.likes.includes(user.uid);
-      const postRef = firestore().collection('posts').doc(post.id).collection('likes').doc(user.uid);
-
-      if (liked) {
-        await postRef.delete();
-        setPost(prevPost => ({
-          ...prevPost,
-          likes: prevPost.likes.filter(uid => uid !== user.uid),
-        }));
-      } else {
-        await postRef.set({});
-        setPost(prevPost => ({
-          ...prevPost,
-          likes: [...prevPost.likes, user.uid],
-        }));
-      }
-    }
-  };
 
   const handleSavePost = async () => {
     const savedPostRef = firestore().collection('users').doc(user.uid).collection('savedPosts').doc(post.id);
@@ -177,141 +161,162 @@ const CommentsScreen = ({ route, navigation }) => {
       setSavedPosts([...savedPosts, post.id]);
     }
   };
-
+  const handleScroll = (event) => {
+    const scrollPosition = event.nativeEvent.contentOffset.y;
+    setShowPost(scrollPosition < 100); // Ẩn bài viết nếu cuộn quá 100px
+  };
   return (
     <View style={styles.container}>
-      {post && (
-        <View style={styles.postContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={20} color="#000" />
-            <Text style={styles.backButtonText}>Trở về</Text>
-          </TouchableOpacity>
-          <View style={styles.postHeader}>
-            <View style={styles.userInfo}>
-              {post.userAvatar ? (
-                <Image source={{ uri: post.userAvatar }} style={styles.avatar} />
-              ) : (
-                <Image source={require('../config/assets/avatar-trang-1.png')} style={styles.avatar} />
-              )}
-              <View>
-                <Text style={styles.postUsername}>{post.userName || 'Unknown'}</Text>
-                <View style={styles.rowContainer}>
-                  <Text style={styles.postDate}>{formatDate(post.createdAt)}</Text>
-                  <Text style={styles.postcategory}>{post.category}</Text>
+
+
+      <FlatList
+        data={comments}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={() => (
+          <View style={styles.postContainer}>
+            {/* Post Details Section */}
+            {isPostVisible && post && (
+              <>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                  <Icon name="arrow-left" size={20} color="#000" />
+                  <Text style={styles.backButtonText}>Trở về</Text>
+                </TouchableOpacity>
+                <View style={styles.postHeader}>
+                  <View style={styles.userInfo}>
+                    {post.userAvatar ? (
+                      <Image source={{ uri: post.userAvatar }} style={styles.avatar} />
+                    ) : (
+                      <Image source={require('../config/assets/avatar-trang-1.png')} style={styles.avatar} />
+                    )}
+                    <View>
+                      <Text style={styles.postUsername}>{post.userName || 'Unknown'}</Text>
+                      <View style={styles.rowContainer}>
+                        <Text style={styles.postDate}>{formatDate(post.createdAt)}</Text>
+                        <Text style={styles.postCategory}>{post.category}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  {user && user.uid === post.userId && (
+                    <View style={styles.postActions}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate('EditPost', {
+                            postId: post.id,
+                            initialContent: post.description,
+                            initialLocation: post.location,
+                            initialMediaUris: post.mediaUrls,
+                            initialCategory: post.category,
+                          })
+                        }
+                      >
+                        <Icon name="edit" size={20} color="blue" />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={handleDeletePost}>
+                        <Icon name="trash" size={20} color="#f00" />
+                      </TouchableOpacity>
+
+                    </View>
+                  )}
+                  
                 </View>
+                <TruncatedText text={post.description} style={styles.postDescription} />
+                <Text style={styles.postDescription}>Vị trí: {post.location}</Text>
+                {post.mediaUrls && post.mediaTypes && (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.mediaContainer}
+                  >
+                    {post.mediaUrls.map((mediaUrl, index) => (
+                      <View key={index} style={styles.mediaWrapper}>
+                        {post.mediaTypes[index] === 'video' ? (
+                          <TouchableOpacity
+                            onPress={() =>
+                              navigation.navigate('MediaViewer', { mediaUrl, mediaType: 'video' })
+                            }
+                          >
+                            <Video
+                              source={{ uri: mediaUrl }}
+                              style={styles.postImage}
+                              controls={false}
+                              resizeMode="cover"
+                            />
+                          </TouchableOpacity>
+                        ) : (
+                          <TouchableOpacity
+                            onPress={() =>
+                              navigation.navigate('MediaViewer', { mediaUrl, mediaType: 'image' })
+                            }
+                          >
+                            <Image source={{ uri: mediaUrl }} style={styles.postImage} />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
+                )}
+                <View style={styles.actionsContainer}>
+                  <TouchableOpacity onPress={handleSavePost} style={styles.saveButton}>
+                    <Icon
+                      name={savedPosts.includes(post.id) ? 'bookmark' : 'bookmark-o'}
+                      size={25}
+                      color={savedPosts.includes(post.id) ? 'pink' : '#333'}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <View style={styles.commentContainer}>
+            <View style={styles.commentContentContainer}>
+              {item.userAvatar ? (
+                <Image source={{ uri: item.userAvatar }} style={styles.commentAvatar} />
+              ) : (
+                <Image source={require('../config/assets/avatar-trang-1.png')} style={styles.commentAvatar} />
+              )}
+              <View style={{ flex: 1 }}>
+                <Text style={styles.commentUsername}>{item.username}</Text>
+                {editingCommentId === item.id ? (
+                  <View>
+                    <TextInput
+                      style={styles.input}
+                      value={editedComment}
+                      onChangeText={setEditedComment}
+                      placeholder="Sửa bình luận..."
+                    />
+                    <Button title="Lưu" onPress={() => handleEditComment(item.id)} />
+                  </View>
+                ) : (
+                  <Text style={styles.commentContent}>{item.content}</Text>
+                )}
+                <Text style={styles.commentTimestamp}>{formatDate(item.createdAt)}</Text>
               </View>
             </View>
-            {user && user.uid === post.userId && (
-              <View style={styles.postActions}>
-                <TouchableOpacity onPress={() => 
-                  // navigation.navigate('EditPost', { postId: post.id })
-                  navigation.navigate('EditPost', {
-                    postId: postId,
-                    initialContent: post.description,
-                    initialLocation: post.location,
-                    initialMediaUris: post.mediaUrls,
-                    initialCategory: post.category,
-                  })                 
-                  }>
-                  <Icon name="edit" style={styles.iconedit} size={20} color="blue" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleDeletePost}>
+            {/* {(user && (user.uid === item.userId || user.uid === post.userId)) && ( */}
+            {user && post && (user.uid === item.userId || user.uid === post.userId) && (
+
+              <View style={styles.commentActions}>
+                {user.uid === item.userId && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setEditingCommentId(item.id);
+                      setEditedComment(item.content);
+                    }}
+                  >
+                    <Icon name="edit" size={20} color="blue" />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
                   <Icon name="trash" size={20} color="#f00" />
                 </TouchableOpacity>
               </View>
             )}
           </View>
-
-          <Text style={styles.postDescription}>{post.description}</Text>
-          <Text style={styles.postDescription}>Vị trí: {post.location}</Text>
-          {/* <Text style={styles.postDescription}>Danh mục: {post.category}</Text> */}
-
-          {/* Media Display Section */}
-          {post.mediaUrls && post.mediaTypes && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.mediaContainer}>
-              {post.mediaUrls.map((mediaUrl, index) => (
-                <View key={index} style={styles.mediaWrapper}>
-                  {post.mediaTypes[index] === 'video' ? (
-                    <Video
-                      source={{ uri: mediaUrl }}
-                      style={styles.postImage}
-                      controls={true}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <TouchableOpacity>
-                      <Image source={{ uri: mediaUrl }} style={styles.postImage} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </ScrollView>
-          )}
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity onPress={handleSavePost} style={styles.saveButton}>
-              <Icon
-                name={savedPosts.includes(post.id) ? 'bookmark' : 'bookmark-o'}
-                size={25}
-                color={savedPosts.includes(post.id) ? 'pink' : '#333'}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {post && (
-        <FlatList
-          data={comments}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.commentContainer}>
-              <View style={styles.commentContentContainer}>
-                {item.userAvatar ? (
-                  <Image source={{ uri: item.userAvatar }} style={styles.commentAvatar} />
-                ) : (
-                  <Image source={require('../config/assets/avatar-trang-1.png')} style={styles.commentAvatar} />
-                )}
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.commentUsername}>{item.username}</Text>
-                  {editingCommentId === item.id ? (
-                    <View>
-                      <TextInput
-                        style={styles.input}
-                        value={editedComment}
-                        onChangeText={setEditedComment}
-                        placeholder="Sửa bình luận..."
-                      />
-                      <Button title="Lưu" onPress={() => handleEditComment(item.id)} />
-                    </View>
-                  ) : (
-                    <Text style={styles.commentContent}>{item.content}</Text>
-                  )}
-                  <Text style={styles.commentTimestamp}>{formatDate(item.createdAt)}</Text>
-                </View>
-              </View>
-
-              {/* Hiển thị nút xóa nếu là người đăng bài viết hoặc người viết bình luận */}
-              {(user && (user.uid === item.userId || user.uid === post.userId)) && (
-                <View style={styles.commentActions}>
-                  {user.uid === item.userId && (
-                    <TouchableOpacity onPress={() => {
-                      setEditingCommentId(item.id);
-                      setEditedComment(item.content);
-                    }}>
-                      <Icon name="edit" size={20} color="blue" />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
-                    <Icon name="trash" size={20} color="#f00" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
-        />
-      )}
-
-
+        )}
+      />
+      {/* Fixed comment input at the top */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -319,10 +324,19 @@ const CommentsScreen = ({ route, navigation }) => {
           value={newComment}
           onChangeText={setNewComment}
         />
-        <Button title="Gửi" onPress={handleAddComment} />
+        <Button
+          title="Gửi"
+          onPress={() => {
+            handleAddComment(newComment);
+            setNewComment('');
+          }}
+        />
       </View>
     </View>
+
+
   );
 };
-
 export default CommentsScreen;
+
+

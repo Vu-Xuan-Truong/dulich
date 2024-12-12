@@ -163,5 +163,10 @@ export const styles = StyleSheet.create({
     saveButton:{
       flexDirection: 'row',
       left:333,
-    }
+    },
+    menuOptionText: {
+      fontSize: 16,
+      padding: 10,
+      color: '#333',
+    },
   });

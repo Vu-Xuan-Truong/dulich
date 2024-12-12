@@ -1,29 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Image, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Video from 'react-native-video';
 import { uploadFile, addNewPostToFirestore, fetchCategories } from '../services/Post/addNewPostBackend';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import { styles } from '../layput/layoutPots/layoutAddnew';
 import LocationInput from '../services/googio/LocationInput'; // Import LocationInput
 import { debounce } from 'lodash';
+
 const AddNewScreen = ({ navigation }) => {
   const [content, setContent] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState(null); // Địa chỉ đã chọn
+  const [selectedLocation, setSelectedLocation] = useState(null); // Selected address
   const [mediaUris, setMediaUris] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loadingPost, setLoadingPost] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
 
+  // Reset all state variables
+  const resetForm = () => {
+    setContent('');
+    setSelectedLocation(null);
+    setMediaUris([]);
+    setSelectedCategory('');
+  };
+
   useEffect(() => {
     const fetchAndSetCategories = async () => {
       const categoryList = await fetchCategories();
       setCategories(categoryList);
     };
-
     fetchAndSetCategories();
   }, []);
+
+  // Reset form when screen is revisited
+  useFocusEffect(
+    useCallback(() => {
+      resetForm();
+    }, [])
+  );
 
   const selectMedia = () => {
     launchImageLibrary({ mediaType: 'mixed', selectionLimit: 0 }, response => {
@@ -56,6 +72,7 @@ const AddNewScreen = ({ navigation }) => {
     if (mediaUrls.length > 0) {
       await addNewPostToFirestore(content, selectedLocation.description, mediaUrls, selectedCategory);
       Alert.alert('Thành công!', 'Đã đăng bài viết mới');
+      resetForm(); // Reset form after successful post
       navigation.goBack();
     } else {
       Alert.alert('Lỗi', 'Không thể đăng tải bài viết.');
@@ -64,9 +81,18 @@ const AddNewScreen = ({ navigation }) => {
     setLoadingPost(false);
     setUploading(false);
   };
+
   const handleLocationChange = debounce((input) => {
     setLocation(input);
   }, 500); // 500ms debounce time
+// Định nghĩa các đuôi video được hỗ trợ
+const supportedVideoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.flv', '.webm'];
+
+// Hàm kiểm tra nếu URI là video
+const isVideo = (uri) => {
+  return supportedVideoExtensions.some(extension => uri.endsWith(extension));
+};
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bài viết mới</Text>
@@ -79,7 +105,7 @@ const AddNewScreen = ({ navigation }) => {
         multiline
       />
       <LocationInput
-        onSelectLocation={(location) => setSelectedLocation(location)} //Nhập địa chỉ
+        onSelectLocation={(location) => setSelectedLocation(location)} // Select address
         onChangeText={handleLocationChange} // Pass the debounced function
       />
 
@@ -99,7 +125,8 @@ const AddNewScreen = ({ navigation }) => {
       <ScrollView horizontal style={styles.mediaContainer}>
         {mediaUris.map((uri, index) => (
           <View key={index} style={styles.imageWrapper}>
-            {uri.endsWith('.mp4') || uri.endsWith('.mov') ? (
+            {/* {uri.endsWith('.mp4') || uri.endsWith('.mov') ? ( */}
+            {isVideo(uri) ? (
               <Video 
                 source={{ uri }} 
                 style={styles.video} 

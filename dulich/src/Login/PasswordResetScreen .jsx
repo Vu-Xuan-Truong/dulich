@@ -52,7 +52,7 @@ const PasswordResetScreen = () => {
         <Icon name="arrow-left" size={26} color="#fff" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Change Password</Text>
+      <Text style={styles.title}>Đổi mật khẩu</Text>
 
       <View style={styles.inputContainer}>
         <TextInput

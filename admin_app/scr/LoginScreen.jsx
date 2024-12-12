@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Vui lòng đăng nhập!!</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -38,12 +38,12 @@ const LoginScreen = ({ navigation }) => {
             />
             <TextInput
                 style={styles.input}
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
             />
-            <Button title="Login" onPress={handleLogin} />
+            <Button title="Đăng nhập" onPress={handleLogin} />
             {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
     );

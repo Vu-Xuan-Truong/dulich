@@ -128,6 +128,7 @@ const DetailPostScreen = ({ navigation }) => {
             <View style={styles.userContainer}>
               <Image
                 source={{ uri: item.user?.profileImageUrl }}
+                
                 style={styles.avatar}
               />
               <Text style={styles.userName}>{item.user?.name || 'Unnamed User'}</Text>

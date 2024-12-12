@@ -5,6 +5,7 @@ import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { styles } from '../layput/LayoutUser/layoutProfile';
 import Video from 'react-native-video';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 const ProfileScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
@@ -86,6 +87,32 @@ const ProfileScreen = ({ navigation }) => {
       setLoading(false);
     }
   }, [user]);
+  // Cấu hình Google Sign-In
+  GoogleSignin.configure({
+    webClientId: '191575077165-bp7kb7ng2ltir078fhe08042qbomahdi.apps.googleusercontent.com', // Web Client ID từ Google Cloud Console
+  });
+
+  // const handleLogout = () => {
+  //   Alert.alert(
+  //     'Đăng xuất',
+  //     'Bạn muốn thoát phải không',
+  //     [
+  //       {
+  //         text: 'Bỏ qua',
+  //         style: 'cancel',
+  //       },
+  //       {
+  //         text: 'Thoát',
+  //         onPress: async () => {
+  //           await auth().signOut();
+  //           navigation.navigate('Login'); // Navigate to Login screen after logging out
+  //         },
+  //         style: 'destructive',
+  //       },
+  //     ],
+  //     { cancelable: true },
+  //   );
+  // };
 
   const handleLogout = () => {
     Alert.alert(
@@ -99,8 +126,18 @@ const ProfileScreen = ({ navigation }) => {
         {
           text: 'Thoát',
           onPress: async () => {
-            await auth().signOut();
-            navigation.navigate('Login'); // Navigate to Login screen after logging out
+            try {
+              // Sign out from Google if the user is signed in with Google
+              await GoogleSignin.signOut();
+              Alert.alert('Thành công', 'Bạn đã đăng xuất khỏi tài khoản.');
+  
+              // Sign out from Firebase
+              await auth().signOut();
+              navigation.navigate('Login'); // Navigate to Login screen after logging out
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Lỗi', 'Không thể đăng xuất. Vui lòng thử lại.');
+            }
           },
           style: 'destructive',
         },
@@ -108,6 +145,8 @@ const ProfileScreen = ({ navigation }) => {
       { cancelable: true },
     );
   };
+  
+
   const adjustedSavedPosts = savedPosts.length % 3 === 0
     ? savedPosts
     : [...savedPosts, ...Array(3 - (savedPosts.length % 3)).fill({ id: 'placeholder' })];
@@ -270,9 +309,11 @@ const ProfileScreen = ({ navigation }) => {
                   keyExtractor={(item) => item.id}
                   numColumns={3}
                   renderItem={({ item }) =>
-                    item.id === 'placeholder' ? <View style={styles.placeholderItem} /> : renderPostItem({ item })
+                    item.id === 'placeholder' ? <View 
+                  style={styles.placeholderItem} 
+                  /> : renderPostItem({ item })
                   }
-                  columnWrapperStyle={styles.columnWrapper}
+                  columnWrapperStyle={styles.columnWrapper1}
                   ItemSeparatorComponent={() => <View style={styles.rowSeparator} />}
                 />
               )}

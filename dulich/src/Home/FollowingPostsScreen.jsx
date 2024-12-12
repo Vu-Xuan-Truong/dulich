@@ -11,6 +11,7 @@ import {
     toggleLikePost,
     toggleSavePost,
 } from '../services/Home/FollowPostsService';
+import TruncatedText from '../services/multipurpose/TruncatedText';
 
 const FollowingPostsScreen = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
@@ -85,7 +86,9 @@ const FollowingPostsScreen = ({ navigation }) => {
             navigation.navigate('UserProfile', { userId });
         }
     };
-
+    const openMediaViewer = (mediaUrl, mediaType) => {
+        navigation.navigate('MediaViewer', { mediaUrl, mediaType });
+    };
     const formatDate = (timestamp) => {
         if (timestamp && timestamp.toDate) {
             const postDate = timestamp.toDate();
@@ -127,7 +130,11 @@ const FollowingPostsScreen = ({ navigation }) => {
                                     <Pressable onPress={() => goToUserProfile(item.userId)}>
                                         <Text style={styles.postUsername}>{item.name}</Text>
                                     </Pressable>
-                                    <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text>
+                                    {/* <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text> */}
+                                    <View style={styles.rowContainer}>
+                                        <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text>
+                                        <Text style={styles.postCategory}>{item.category}</Text>
+                                    </View>
                                 </View>
                             </View>
 
@@ -138,9 +145,9 @@ const FollowingPostsScreen = ({ navigation }) => {
                             )}
                         </View>
 
-                        <Text style={styles.postDescription}>{item.description}</Text>
+                        <TruncatedText text={item.description} style={styles.postDescription} />
                         <Text style={styles.postDescription}>Vị trí: {item.location}</Text>
-                        <Text style={styles.postDescription}>Danh mục: {item.category}</Text>
+                        {/* <Text style={styles.postDescription}>Danh mục: {item.category}</Text> */}
 
                         {/* Media Display Section */}
                         {item.mediaUrls && item.mediaTypes && (
@@ -148,14 +155,18 @@ const FollowingPostsScreen = ({ navigation }) => {
                                 {item.mediaUrls.map((mediaUrl, index) => (
                                     <View key={index} style={styles.mediaWrapper}>
                                         {item.mediaTypes[index] === 'video' ? (
-                                            <Video
-                                                source={{ uri: mediaUrl }}
-                                                style={styles.video}
-                                                controls={true}
-                                                resizeMode="cover"
-                                            />
+                                            <TouchableOpacity onPress={() => openMediaViewer(mediaUrl, 'video')}>
+                                                <Video
+
+                                                    source={{ uri: mediaUrl }}
+                                                    style={styles.video}
+                                                    controls={true}
+                                                    resizeMode="cover"
+                                                />
+                                            </TouchableOpacity>
+
                                         ) : (
-                                            <TouchableOpacity onPress={() => goToComments(item.id)}>
+                                            <TouchableOpacity onPress={() => openMediaViewer(mediaUrl, 'image')}>
                                                 <Image source={{ uri: mediaUrl }} style={styles.postMedia} />
                                             </TouchableOpacity>
                                         )}

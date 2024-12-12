@@ -21,36 +21,44 @@ export const fetchUser = async () => {
   return null;
 };
 
-// Search for posts by location
-export const searchPosts = async (keyword) => {
+
+export const searchPosts = async (keyword = '', category = null) => {
   try {
-    if (!keyword.trim()) return [];
+    let query = firestore().collection('posts');
 
-    const postsSnapshot = await firestore()
-      .collection('posts')
-      .where('location', '>=', keyword)
-      .where('location', '<=', keyword + '\uf8ff')
-      .get();
+    if (keyword.trim()) {
+      query = query.where('location', '>=', keyword).where('location', '<=', keyword + '\uf8ff');
+    }
 
+    if (category) {
+      query = query.where('category', '==', category);
+    }
+
+    const postsSnapshot = await query.get();
     if (postsSnapshot.empty) return [];
 
-    const posts = await Promise.all(postsSnapshot.docs.map(async (doc) => {
-      const postData = doc.data();
-      const userSnapshot = await firestore().collection('users').doc(postData.userId).get();
-      const userData = userSnapshot.data();
+    const posts = await Promise.all(
+      postsSnapshot.docs.map(async (doc) => {
+        const postData = doc.data();
 
-      const likesSnapshot = await firestore().collection('posts').doc(doc.id).collection('likes').get();
-      const likes = likesSnapshot.docs.map(likeDoc => likeDoc.id);
+        // Fetch user data
+        const userSnapshot = await firestore().collection('users').doc(postData.userId).get();
+        const userData = userSnapshot.exists ? userSnapshot.data() : { name: 'Unknown', profileImageUrl: null };
 
-      return {
-        id: doc.id,
-        name: userData ? userData.name : 'Unknown',
-        userId: postData.userId,
-        profileImageUrl: userData ? userData.profileImageUrl : null,
-        likes,
-        ...postData,
-      };
-    }));
+        // Fetch likes
+        const likesSnapshot = await firestore().collection('posts').doc(doc.id).collection('likes').get();
+        const likes = likesSnapshot.docs.map((likeDoc) => likeDoc.id);
+
+        return {
+          id: doc.id,
+          name: userData.name,
+          userId: postData.userId,
+          profileImageUrl: userData.profileImageUrl,
+          likes,
+          ...postData,
+        };
+      })
+    );
 
     return posts;
   } catch (error) {
@@ -58,6 +66,7 @@ export const searchPosts = async (keyword) => {
     return [];
   }
 };
+
 
 // Search for users by name
 export const searchUsers = async (keyword) => {
@@ -82,25 +91,87 @@ export const searchUsers = async (keyword) => {
   }
 };
 
-// Like or unlike a post
 export const handleLike = async (postId, userId) => {
-  const postRef = firestore().collection('posts').doc(postId);
-  const likeRef = postRef.collection('likes').doc(userId);
-
-  const postSnapshot = await postRef.get();
-  if (!postSnapshot.exists) return;
-
-  const postLikes = postSnapshot.data().likes || [];
-
-  if (postLikes.includes(userId)) {
-    // Unlike
-    await likeRef.delete();
-    postLikes.filter((like) => like !== userId);
-  } else {
-    // Like
-    await likeRef.set({});
-    postLikes.push(userId);
+  if (!postId || !userId) {
+    console.error('postId hoặc userId không hợp lệ:', { postId, userId });
+    return; // Thoát nếu thiếu thông tin cần thiết
   }
 
-  return postLikes;
+  const postRef = firestore().collection('posts').doc(postId);
+
+  try {
+    const postSnapshot = await postRef.get();
+    if (!postSnapshot.exists) {
+      console.error(`Bài viết với ID ${postId} không tồn tại.`);
+      return;
+    }
+
+    const postLikes = postSnapshot.data()?.likes || [];
+
+    if (postLikes.includes(userId)) {
+      // Nếu đã like, thực hiện unlike
+      await postRef.update({
+        likes: firestore.FieldValue.arrayRemove(userId),
+      });
+      console.log(`User ${userId} đã unlike bài viết ${postId}`);
+    } else {
+      // Nếu chưa like, thực hiện like
+      await postRef.update({
+        likes: firestore.FieldValue.arrayUnion(userId),
+      });
+      console.log(`User ${userId} đã like bài viết ${postId}`);
+    }
+  } catch (error) {
+    console.error('Lỗi khi xử lý like/unlike: ', error);
+  }
 };
+
+
+// Search for posts by category
+export const searchCategories = async () => {
+  try {
+    const categoriesSnapshot = await firestore()
+      .collection('categories')
+      .get();
+
+    return categoriesSnapshot.docs.map(doc => doc.data());
+  } catch (error) {
+    console.error('Error fetching categories: ', error);
+  }
+};
+
+export const handleSavePost = async (postId, userId) => {
+  if (!postId || !userId) {
+    console.error('postId hoặc userId không hợp lệ:', { postId, userId });
+    return;
+  }
+
+  const userRef = firestore().collection('users').doc(userId);
+
+  try {
+    const userSnapshot = await userRef.get();
+    if (!userSnapshot.exists) {
+      console.error(`Người dùng với ID ${userId} không tồn tại.`);
+      return;
+    }
+
+    const savedPosts = userSnapshot.data()?.savedPosts || [];
+
+    if (savedPosts.includes(postId)) {
+      // Nếu bài viết đã được lưu, thực hiện hủy lưu
+      await userRef.update({
+        savedPosts: firestore.FieldValue.arrayRemove(postId),
+      });
+      console.log(`User ${userId} đã hủy lưu bài viết ${postId}`);
+    } else {
+      // Nếu bài viết chưa được lưu, thực hiện lưu
+      await userRef.update({
+        savedPosts: firestore.FieldValue.arrayUnion(postId),
+      });
+      console.log(`User ${userId} đã lưu bài viết ${postId}`);
+    }
+  } catch (error) {
+    console.error('Lỗi khi xử lý lưu bài viết: ', error);
+  }
+};
+

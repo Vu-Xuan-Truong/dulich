@@ -152,5 +152,10 @@ export const styles = StyleSheet.create({
   shareButton:{
     left:10,
   },
-
+  menuOptionText: {
+    fontSize: 16,
+    padding: 10,
+    color: '#333',
+  },
+  
 });

@@ -183,7 +183,10 @@ const UserProfileScreen = ({ route, navigation }) => {
       {userData && (
         <>
           <View style={styles.userInfoContainer}>
-            <Image source={{ uri: userData.profileImageUrl }} style={styles.profileImage} />
+            <Image 
+            // source={{ uri: userData.profileImageUrl }} 
+            source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : require('../config/assets/avatar-trang-1.png')}
+            style={styles.profileImage} />
             <Text style={styles.name}>{userData.name}</Text>
             <Text style={styles.userBio}>{userData.bio}</Text>
 

@@ -81,4 +81,30 @@ export const styles = StyleSheet.create({
       color: '#000000', // Text color for links
       marginTop: 25,
     },
+    button1: {
+      backgroundColor: 'white',  // White background for the button
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: '#ddd', // Light border color
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row', // Align text and logo horizontally
+      width: '100%', // Full width (optional)
+    },
+    buttonContent: {
+      flexDirection: 'row', // Align text and image side by side
+      alignItems: 'center', // Center vertically
+    },
+    googleLogo: {
+      width: 24, // Size of the Google logo
+      height: 24,
+      marginRight: 8, // Space between logo and text
+    },
+    buttonText1: {
+      fontSize: 16,
+      color: '#333', // Text color
+      fontWeight: 'bold', // Make the text bold
+    },
   });

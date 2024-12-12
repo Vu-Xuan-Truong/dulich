@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { styles } from './Layout/homelayout';
 import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import Video from 'react-native-video';
+import TruncatedText from '../services/TruncatedText';
 
 const AdminScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
@@ -180,7 +181,8 @@ const PostItem = React.memo(({ item, onDelete, formatDate, navigation }) => {
         <Text style={styles.postDate}>{formatDate(item.createdAt)}</Text>
         <Text style={styles.postcategory}> {item.category}</Text>
       </View>
-      <Text style={styles.postDescription}>{item.description}</Text>
+      {/* <Text style={styles.postDescription}>{item.description}</Text> */}
+      <TruncatedText text={item.description} style={styles.postDescription} />
       <Text style={styles.postDescription}>Vị trí: {item.location}</Text>
       {/* <Text style={styles.postDescription}>Danh mục: {item.category}</Text> */}
 

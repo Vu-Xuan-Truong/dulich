@@ -44,7 +44,7 @@ const SearchUsersScreen = ({ navigation }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.searchInput}
-        placeholder="Search users..."
+        placeholder="Tìm kiếm cuộc trò chuyện..."
         value={search}
         onChangeText={setSearch}
       />
